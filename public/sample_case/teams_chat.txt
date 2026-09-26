@@ -1,0 +1,19 @@
+--- TEAMS CHAT TRANSCRIPT ---
+Data: 2026-09-25
+Partecipanti: Caio Bianchi, Sempronia Verdi
+
+[14:30] Caio Bianchi: Ciao Sempronia, ti scrivo riguardo la fattura #9920 del fornitore Alfa Srl. Tizio mi ha segnalato che non è ancora stata pagata. Riesci a verificare?
+
+[14:35] Sempronia Verdi: Ciao Caio. Ho controllato il sistema. La fattura è in attesa di autorizzazione. Non ho ricevuto il documento di approvazione da Legal. Senza quello non posso procedere.
+
+[14:38] Caio Bianchi: Ma io credevo che Legal avesse già mandato tutto. Quando ti serve esattamente?
+
+[14:40] Sempronia Verdi: Mi serve l'allegato all'Ordine d'Acquisto firmato. Caio inviò la richiesta il 18 settembre a Legal, ma non ho ancora riscontro.
+
+[14:42] Caio Bianchi: Ok capito. Vado a chiamare direttamente Legal adesso.
+
+[14:55] Caio Bianchi: Ho parlato con Marco in Legal. Dice che non hanno mai ricevuto la richiesta via sistema, solo una mail informale. Stanno cercando i documenti.
+
+[15:10] Sempronia Verdi: Ok tienimi aggiornata. La deadline per il pagamento in giornata è le 17:00, poi la banca non processa più. Se non arriva l'autorizzazione entro allora, il pagamento slitta a lunedì.
+
+[15:12] Caio Bianchi: Capito. Sto escalando ora.

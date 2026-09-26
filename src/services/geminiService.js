@@ -1,6 +1,7 @@
-import { SAMPLE_DISPUTE_TEXT } from '../data/sampleDispute.js';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ? import.meta.env.VITE_GEMINI_API_KEY.trim() : '';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+// Use gemini-2.5-flash which is active and supported
+const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
 
 /**
  * Phase 1: Context & Gap Verification Analysis
@@ -19,18 +20,18 @@ export async function analyzeGaps(text) {
     };
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
   
-  const prompt = `You are a forensic document auditor. Analyze the following dispute text and determine if there are missing context references or unreadable sections.
-  Respond ONLY with a valid JSON object matching this schema:
-  {
-    "has_gaps": boolean,
-    "missing_references": string[],
-    "unreadable_warning": boolean
-  }
-  
-  Dispute Text:
-  ${text}`;
+  const prompt = `You are a forensic document auditor. Analyze the following dispute text and determine if there are missing context references (e.g. mentions of emails, meetings, or documents not provided) or unreadable sections.
+Respond ONLY with a valid JSON object matching this exact schema:
+{
+  "has_gaps": boolean,
+  "missing_references": string[],
+  "unreadable_warning": boolean
+}
+
+Dispute Text:
+${text}`;
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -42,8 +43,18 @@ export async function analyzeGaps(text) {
   });
 
   const data = await response.json();
+  if (!response.ok) {
+    throw new Error(`Gemini API Error (${response.status}): ${data.error?.message || response.statusText}`);
+  }
+
   const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  return JSON.parse(rawJson);
+  if (!rawJson) {
+    throw new Error('Gemini returned an empty response. Check if content violated safety policies.');
+  }
+
+  // Clean markdown fencing if returned
+  const cleaned = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(cleaned);
 }
 
 /**
@@ -105,35 +116,37 @@ export async function extractTimelineAndBottlenecks(text) {
     };
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
   
-  const prompt = `You are a forensic timeline analyzer. Extract a strict chronological timeline, root cause bottlenecks, and recommended actions from the provided dispute communications.
-  Respond ONLY with a valid JSON object matching this schema:
-  {
-    "timeline": [
-      {
-        "id": "string",
-        "date": "string",
-        "actor": "string",
-        "summary": "string",
-        "raw_excerpt": "string"
-      }
-    ],
-    "bottlenecks": [
-      {
-        "id": "string",
-        "title": "string",
-        "severity": "HIGH" | "MEDIUM" | "LOW",
-        "description": "string"
-      }
-    ],
-    "recommendations": [
-      "string"
-    ]
-  }
+  const prompt = `You are a forensic timeline analyzer. Extract a strict chronological timeline, root cause bottlenecks, and actionable recommendations from the provided dispute communications.
+Respond ONLY with a valid JSON object matching this exact schema:
+{
+  "timeline": [
+    {
+      "id": "string",
+      "date": "string",
+      "actor": "string",
+      "summary": "string",
+      "raw_excerpt": "string"
+    }
+  ],
+  "bottlenecks": [
+    {
+      "id": "string",
+      "title": "string",
+      "severity": "HIGH",
+      "description": "string"
+    }
+  ],
+  "recommendations": [
+    "string"
+  ]
+}
 
-  Dispute Text:
-  ${text}`;
+Note: For severity, choose between HIGH, MEDIUM, or LOW.
+
+Dispute Text:
+${text}`;
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -145,6 +158,15 @@ export async function extractTimelineAndBottlenecks(text) {
   });
 
   const data = await response.json();
+  if (!response.ok) {
+    throw new Error(`Gemini API Error (${response.status}): ${data.error?.message || response.statusText}`);
+  }
+
   const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  return JSON.parse(rawJson);
+  if (!rawJson) {
+    throw new Error('Gemini returned an empty response. Check if content violated safety policies.');
+  }
+
+  const cleaned = rawJson.replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(cleaned);
 }

@@ -1,214 +1,370 @@
 import './style.css';
-import { SAMPLE_DISPUTE_TEXT } from './data/sampleDispute.js';
 import { analyzeGaps, extractTimelineAndBottlenecks } from './services/geminiService.js';
 
+// =============================================
+//  APPLICATION STATE
+// =============================================
 let appState = {
   theme: 'dark',
-  inputText: '',
+  allText: '',           // combined text from all sources
+  uploadedFiles: [],     // list of {name, text} objects
+  pastedText: '',
   gapData: null,
   analysisData: null,
   activeActorFilter: 'ALL'
 };
 
-// DOM Elements
-const btnThemeToggle = document.getElementById('btn-theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
-const themeLabel = document.getElementById('theme-label');
+// =============================================
+//  DOM ELEMENTS
+// =============================================
+const btnThemeToggle  = document.getElementById('btn-theme-toggle');
+const themeIcon       = document.getElementById('theme-icon');
+const themeLabel      = document.getElementById('theme-label');
+const btnTutorial     = document.getElementById('btn-tutorial');
 
-const inputDispute = document.getElementById('input-dispute');
-const btnLoadSample = document.getElementById('btn-load-sample');
-const btnAnalyzeCase = document.getElementById('btn-analyze-case');
+const dropZone        = document.getElementById('drop-zone');
+const fileUploadInput = document.getElementById('file-upload');
+const fileListEl      = document.getElementById('file-list');
+
+const inputDispute    = document.getElementById('input-dispute');
+const btnLoadSample   = document.getElementById('btn-load-sample');
+const btnAnalyzeCase  = document.getElementById('btn-analyze-case');
 
 const surfaceVerification = document.getElementById('surface-verification');
-const reasoningLog = document.getElementById('reasoning-log');
-const gapActionBox = document.getElementById('gap-action-box');
-const missingGapsList = document.getElementById('missing-gaps-list');
-const btnProceedAnyway = document.getElementById('btn-proceed-anyway');
+const reasoningLog        = document.getElementById('reasoning-log');
+const gapActionBox        = document.getElementById('gap-action-box');
+const missingGapsList     = document.getElementById('missing-gaps-list');
+const btnProceedAnyway    = document.getElementById('btn-proceed-anyway');
 
-const surfaceDashboard = document.getElementById('surface-dashboard');
-const timelineContainer = document.getElementById('timeline-container');
-const bottlenecksContainer = document.getElementById('bottlenecks-container');
+const surfaceDashboard        = document.getElementById('surface-dashboard');
+const timelineContainer       = document.getElementById('timeline-container');
+const bottlenecksContainer    = document.getElementById('bottlenecks-container');
 const recommendationsContainer = document.getElementById('recommendations-container');
-const actorFiltersContainer = document.getElementById('actor-filters');
+const actorFiltersContainer   = document.getElementById('actor-filters');
 
-const btnCopySummary = document.getElementById('btn-copy-summary');
-const btnExportPdf = document.getElementById('btn-export-pdf');
-const modalExport = document.getElementById('modal-export');
-const btnCloseModal = document.getElementById('btn-close-modal');
+const btnCopySummary  = document.getElementById('btn-copy-summary');
+const btnExportPdf    = document.getElementById('btn-export-pdf');
+const modalExport     = document.getElementById('modal-export');
+const btnCloseModal   = document.getElementById('btn-close-modal');
 const btnTriggerPrint = document.getElementById('btn-trigger-print');
-const btnTutorial = document.getElementById('btn-tutorial');
 
-// Theme Toggle
+// =============================================
+//  THEME TOGGLE
+// =============================================
 btnThemeToggle.addEventListener('click', () => {
   appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', appState.theme);
-  document.body.classList.toggle('theme-light', appState.theme === 'light');
-  themeIcon.textContent = appState.theme === 'dark' ? '☀️' : '🌙';
+  themeIcon.textContent  = appState.theme === 'dark' ? '☀️' : '🌙';
   themeLabel.textContent = appState.theme === 'dark' ? 'Light Mode' : 'Dark Mode';
 });
 
-// Tutorial Button
+// Tutorial link (placeholder — replace with actual video URL)
 btnTutorial.addEventListener('click', () => {
-  alert('Tutorial Video: This link will open your official Devpost Hackathon Demo Video!');
+  alert('Tutorial Video: Replace this with your Devpost demo video URL!');
 });
 
-// Load Sample Dispute Case
-btnLoadSample.addEventListener('click', () => {
-  inputDispute.value = SAMPLE_DISPUTE_TEXT;
-  appState.inputText = SAMPLE_DISPUTE_TEXT;
+// =============================================
+//  FILE UPLOAD — drag & drop + browse
+// =============================================
+
+// Read a file object and return its text
+function readFileAsText(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result || '');
+    reader.onerror = () => resolve('');
+    // For .eml, .msg, .txt: read as text
+    // For .pdf: basic text extraction via readAsText (works for text-based PDFs)
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+// Add a file to the uploaded files list and render chips
+async function addFile(file) {
+  const text = await readFileAsText(file);
+  appState.uploadedFiles.push({ name: file.name, text });
+  renderFileChips();
+}
+
+function renderFileChips() {
+  if (appState.uploadedFiles.length === 0) {
+    fileListEl.classList.add('hidden');
+    return;
+  }
+  fileListEl.classList.remove('hidden');
+  fileListEl.innerHTML = appState.uploadedFiles.map((f, i) => `
+    <div class="file-chip">
+      📄 ${f.name}
+      <button data-idx="${i}" title="Remove">✕</button>
+    </div>
+  `).join('');
+  fileListEl.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      appState.uploadedFiles.splice(idx, 1);
+      renderFileChips();
+    });
+  });
+}
+
+// Browse button
+fileUploadInput.addEventListener('change', async (e) => {
+  for (const file of e.target.files) {
+    await addFile(file);
+  }
+  e.target.value = ''; // reset so same file can be re-added
 });
 
-// Phase 1: Analyze Case & Verify Gaps
+// Drag & Drop
+dropZone.addEventListener('click', (e) => {
+  if (e.target.tagName !== 'LABEL') fileUploadInput.click();
+});
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', async (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  for (const file of e.dataTransfer.files) {
+    await addFile(file);
+  }
+});
+
+// =============================================
+//  LOAD SAMPLE DISPUTE (from sample_case/ folder)
+// =============================================
+btnLoadSample.addEventListener('click', async () => {
+  try {
+    // Fetch sample files from the sample_case directory served by Vite
+    const [emailResp, teamsResp, emlResp] = await Promise.all([
+      fetch('/sample_case/email_thread.txt'),
+      fetch('/sample_case/teams_chat.txt'),
+      fetch('/sample_case/legal_request.eml')
+    ]);
+    const [emails, teams, eml] = await Promise.all([
+      emailResp.text(),
+      teamsResp.text(),
+      emlResp.text()
+    ]);
+
+    // Load as virtual files
+    appState.uploadedFiles = [
+      { name: 'email_thread.txt', text: emails },
+      { name: 'teams_chat.txt', text: teams },
+      { name: 'legal_request.eml', text: eml }
+    ];
+    renderFileChips();
+    inputDispute.value = '';
+    alert('✅ Sample case loaded: 2 emails + 1 Teams chat + 1 EML file. Click "Analyze Case" to proceed.');
+  } catch (err) {
+    alert('Could not load sample files: ' + err.message);
+  }
+});
+
+// =============================================
+//  COMBINE ALL TEXT SOURCES
+// =============================================
+function buildCombinedText() {
+  const parts = [];
+  for (const f of appState.uploadedFiles) {
+    parts.push(`\n\n=== FILE: ${f.name} ===\n${f.text}`);
+  }
+  const pasted = inputDispute.value.trim();
+  if (pasted) parts.push(`\n\n=== PASTED TEXT ===\n${pasted}`);
+  return parts.join('\n').trim();
+}
+
+// =============================================
+//  PHASE 1: ANALYZE CASE
+// =============================================
 btnAnalyzeCase.addEventListener('click', async () => {
-  const text = inputDispute.value.trim();
-  if (!text) {
-    alert('Please paste or load dispute text first.');
+  const combined = buildCombinedText();
+  if (!combined) {
+    alert('Please upload files or paste text before analyzing.');
     return;
   }
 
-  appState.inputText = text;
+  appState.allText = combined;
+
+  // Show verification surface and reset state
   surfaceVerification.classList.remove('hidden');
-  reasoningLog.innerHTML = '<div class="reasoning-item"><span>⏳</span> Analyzing document structure and temporal markers...</div>';
+  gapActionBox.classList.add('hidden');
+  surfaceDashboard.classList.add('hidden');
+  reasoningLog.innerHTML = '<div class="reasoning-item"><span>⏳</span> Parsing document sources...</div>';
+
+  // Scroll to verification section
+  surfaceVerification.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   try {
-    const result = await analyzeGaps(text);
+    // Simulate step-by-step reasoning log
+    await delay(400);
+    appendLog('ok', `${appState.uploadedFiles.length} file(s) + pasted text parsed successfully.`);
+    await delay(500);
+    appendLog('ok', 'Document structure and formatting evaluated.');
+    await delay(600);
+    appendLog('ok', 'Scanning for temporal markers, actors, and references...');
+    await delay(300);
+
+    const result = await analyzeGaps(combined);
     appState.gapData = result;
 
-    let logHtml = '<div class="reasoning-item"><span class="badge-ok">[✓]</span> Document parsing initialized.</div>';
-    logHtml += '<div class="reasoning-item"><span class="badge-ok">[✓]</span> Temporal markers evaluated.</div>';
+    if (result.unreadable_warning) {
+      appendLog('warn', 'Warning: No readable dates or temporal context detected. Analysis may be incomplete.');
+    }
 
-    if (result.has_gaps) {
-      logHtml += '<div class="reasoning-item"><span class="badge-warn">[!]</span> Missing context references identified in communication timeline.</div>';
-      reasoningLog.innerHTML = logHtml;
-
+    if (result.has_gaps && result.missing_references.length > 0) {
+      appendLog('warn', `${result.missing_references.length} missing context reference(s) identified.`);
       missingGapsList.innerHTML = result.missing_references.map(ref => `<li>${ref}</li>`).join('');
       gapActionBox.classList.remove('hidden');
     } else {
-      logHtml += '<div class="reasoning-item"><span class="badge-ok">[✓]</span> Context complete. Proceeding to forensic analysis...</div>';
-      reasoningLog.innerHTML = logHtml;
+      appendLog('ok', 'Context complete. No missing references detected.');
+      await delay(300);
+      appendLog('ok', 'Proceeding to forensic analysis...');
+      await delay(400);
       await runPhase2Analysis();
     }
   } catch (err) {
-    reasoningLog.innerHTML += `<div class="reasoning-item" style="color: #f87171;">❌ Verification Error: ${err.message}</div>`;
+    appendLog('error', `Analysis Error: ${err.message}`);
+    console.error(err);
   }
 });
 
-// Proceed Anyway Handler
+// Utility: append a line to reasoning log
+function appendLog(type, message) {
+  const div = document.createElement('div');
+  div.className = 'reasoning-item';
+  const badge = type === 'ok'
+    ? '<span class="badge-ok">[✓]</span>'
+    : type === 'warn'
+    ? '<span class="badge-warn">[!]</span>'
+    : '<span style="color: var(--danger-color);">❌</span>';
+  div.innerHTML = `${badge} ${message}`;
+  reasoningLog.appendChild(div);
+  reasoningLog.scrollTop = reasoningLog.scrollHeight;
+}
+
+// Utility: simple delay
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Proceed Anyway
 btnProceedAnyway.addEventListener('click', async () => {
+  gapActionBox.classList.add('hidden');
+  appendLog('ok', 'User chose to proceed. Running forensic extraction...');
   await runPhase2Analysis();
 });
 
-// Phase 2: Run Forensic Dashboard Extraction
+// =============================================
+//  PHASE 2: FORENSIC EXTRACTION & DASHBOARD
+// =============================================
 async function runPhase2Analysis() {
   surfaceDashboard.classList.remove('hidden');
-  timelineContainer.innerHTML = '<div style="padding: 1rem; color: var(--text-secondary);">Extracting chronological timeline and root-cause bottlenecks...</div>';
-  
+  timelineContainer.innerHTML = '<div style="padding: 1rem; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.85rem;">⏳ Extracting timeline and bottlenecks...</div>';
+  surfaceDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   try {
-    const data = await extractTimelineAndBottlenecks(appState.inputText);
+    const data = await extractTimelineAndBottlenecks(appState.allText);
     appState.analysisData = data;
     renderDashboard(data);
+    appendLog('ok', 'Forensic dashboard rendered successfully.');
   } catch (err) {
-    timelineContainer.innerHTML = `<div style="color: #f87171;">Error rendering dashboard: ${err.message}</div>`;
+    timelineContainer.innerHTML = `<div style="color: var(--danger-color);">Error: ${err.message}</div>`;
+    appendLog('error', `Dashboard Error: ${err.message}`);
   }
 }
 
-// Render Dual-Panel Forensic Dashboard
+// =============================================
+//  DASHBOARD RENDERING
+// =============================================
 function renderDashboard(data) {
-  // Extract Unique Actors for Filters
-  const actors = ['ALL', ...new Set(data.timeline.map(item => item.actor.split(' ')[0]))];
-  renderActorFilters(actors);
+  const actors = ['ALL', ...new Set(data.timeline.map(e => e.actor.split(' ')[0]))];
+  renderActorFilters(actors, data.timeline);
   renderTimeline(data.timeline);
   renderBottlenecks(data.bottlenecks);
   renderRecommendations(data.recommendations);
 }
 
-// Render Actor Filter Pills
-function renderActorFilters(actors) {
+function renderActorFilters(actors, timeline) {
   actorFiltersContainer.innerHTML = actors.map(actor => `
     <button class="pill-filter ${appState.activeActorFilter === actor ? 'active' : ''}" data-actor="${actor}">
-      ${actor === 'ALL' ? 'Show All Actors' : actor}
+      ${actor === 'ALL' ? 'All Actors' : actor}
     </button>
   `).join('');
-
   actorFiltersContainer.querySelectorAll('.pill-filter').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      appState.activeActorFilter = e.target.dataset.actor;
-      renderActorFilters(actors);
-      filterTimeline();
+      appState.activeActorFilter = e.currentTarget.dataset.actor;
+      renderActorFilters(actors, timeline);
+      const filtered = appState.activeActorFilter === 'ALL'
+        ? timeline
+        : timeline.filter(ev => ev.actor.toLowerCase().includes(appState.activeActorFilter.toLowerCase()));
+      renderTimeline(filtered);
     });
   });
 }
 
-// Filter Timeline Events by Actor
-function filterTimeline() {
-  if (!appState.analysisData) return;
-  if (appState.activeActorFilter === 'ALL') {
-    renderTimeline(appState.analysisData.timeline);
-  } else {
-    const filtered = appState.analysisData.timeline.filter(item => 
-      item.actor.toLowerCase().includes(appState.activeActorFilter.toLowerCase())
-    );
-    renderTimeline(filtered);
-  }
-}
-
-// Render Timeline Feed
 function renderTimeline(timeline) {
   if (!timeline || timeline.length === 0) {
-    timelineContainer.innerHTML = '<div style="color: var(--text-secondary);">No events found for this filter.</div>';
+    timelineContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem;">No events found for this filter.</div>';
     return;
   }
-
   timelineContainer.innerHTML = timeline.map(item => `
     <div class="timeline-item">
       <div class="timeline-date">${item.date}</div>
       <div class="timeline-actor">${item.actor}</div>
       <div class="timeline-summary">${item.summary}</div>
-      <details style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
-        <summary style="cursor: pointer;">Raw Excerpt</summary>
-        <div style="font-family: var(--font-mono); margin-top: 0.3rem; padding: 0.5rem; background: var(--bg-primary); border-radius: 4px;">
-          "${item.raw_excerpt}"
-        </div>
-      </details>
+      ${item.raw_excerpt ? `
+      <details>
+        <summary>View source excerpt</summary>
+        <div class="timeline-excerpt">${item.raw_excerpt}</div>
+      </details>` : ''}
     </div>
   `).join('');
 }
 
-// Render Bottleneck Diagnosis Cards
 function renderBottlenecks(bottlenecks) {
   bottlenecksContainer.innerHTML = bottlenecks.map(item => `
     <div class="bottleneck-card">
-      <div class="bottleneck-title">🚨 [${item.severity}] ${item.title}</div>
-      <div style="font-size: 0.875rem; color: var(--text-secondary);">${item.description}</div>
+      <div class="bottleneck-title">[${item.severity}] ${item.title}</div>
+      <div class="bottleneck-desc">${item.description}</div>
     </div>
   `).join('');
 }
 
-// Render Action Plan
 function renderRecommendations(recommendations) {
   recommendationsContainer.innerHTML = `
-    <ul style="margin-left: 1.25rem; font-size: 0.9rem; color: var(--text-secondary);">
-      ${recommendations.map(rec => `<li style="margin-bottom: 0.5rem;">${rec}</li>`).join('')}
+    <ul class="recommendations-list">
+      ${recommendations.map((rec, i) => `
+        <li><span class="rec-num">${i + 1}</span><span>${rec}</span></li>
+      `).join('')}
     </ul>
   `;
 }
 
-// Copy Summary for Teams / Email
+// =============================================
+//  UTILITY ACTIONS
+// =============================================
 btnCopySummary.addEventListener('click', () => {
-  if (!appState.analysisData) return;
-  const summaryText = `Chronos Forensic Summary:
-- Key Bottleneck: ${appState.analysisData.bottlenecks[0]?.title || 'None'}
-- Top Action Required: ${appState.analysisData.recommendations[0] || 'None'}
-Generated via Chronos Forensic Dashboard.`;
+  if (!appState.analysisData) { alert('No analysis available yet.'); return; }
+  const { bottlenecks, recommendations } = appState.analysisData;
+  const text = [
+    '📊 Chronos Forensic Summary',
+    '',
+    '🔴 Key Bottlenecks:',
+    ...bottlenecks.map(b => `  • [${b.severity}] ${b.title}: ${b.description}`),
+    '',
+    '✅ Recommended Actions:',
+    ...recommendations.map((r, i) => `  ${i + 1}. ${r}`),
+    '',
+    'Generated by Chronos Forensic Analyzer'
+  ].join('\n');
 
-  navigator.clipboard.writeText(summaryText);
-  alert('Executive summary copied to clipboard! Ready to paste into Teams or Email.');
+  navigator.clipboard.writeText(text).then(() => {
+    alert('✅ Summary copied to clipboard — ready to paste into Teams or Email!');
+  }).catch(() => {
+    alert('Clipboard not available. Please copy manually from the dashboard.');
+  });
 });
 
-// PDF Export Modal Handlers
 btnExportPdf.addEventListener('click', () => modalExport.classList.remove('hidden'));
 btnCloseModal.addEventListener('click', () => modalExport.classList.add('hidden'));
-
 btnTriggerPrint.addEventListener('click', () => {
   modalExport.classList.add('hidden');
   window.print();

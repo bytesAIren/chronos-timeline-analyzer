@@ -1,4 +1,4 @@
-:root {
+:root, html[data-theme="dark"] {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-card: #1e293b;
@@ -15,7 +15,7 @@
   --font-mono: 'JetBrains Mono', monospace, Roboto Mono, Courier New;
 }
 
-[data-theme="light"] {
+html[data-theme="light"] {
   --bg-primary: #f8fafc;
   --bg-secondary: #f1f5f9;
   --bg-card: #ffffff;

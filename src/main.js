@@ -42,6 +42,7 @@ const btnTutorial = document.getElementById('btn-tutorial');
 btnThemeToggle.addEventListener('click', () => {
   appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', appState.theme);
+  document.body.classList.toggle('theme-light', appState.theme === 'light');
   themeIcon.textContent = appState.theme === 'dark' ? '☀️' : '🌙';
   themeLabel.textContent = appState.theme === 'dark' ? 'Light Mode' : 'Dark Mode';
 });

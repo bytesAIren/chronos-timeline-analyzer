@@ -9,7 +9,7 @@ Build mode: fast
 
 ## Slices
 
-- [ ] **1. Scaffold Vite SPA & Forensic Dark/Light UI Shell with Sample Loader**
+- [x] **1. Scaffold Vite SPA & Forensic Dark/Light UI Shell with Sample Loader**
   Becomes usable: A running local Vite web app displaying the header, theme toggle, tutorial video link, ingestion dropzone, raw text area, and a working "Load Sample Dispute" button that populates the input.
   Why now: Establishes project scaffolding, Vite build, CSS styling, theme toggle, and UI shell so all AI verification and dashboard components have a solid landing zone.
   PRD ref: `prd.md > Screens and Layout`, `prd.md > Look and Feel`
@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: Open http://localhost:5173, toggle Dark/Light theme, click "Load Sample Dispute" and verify sample text populates the area.
   Commit: `Scaffold Vite SPA shell and sample dispute loader`
 
-- [ ] **2. Phase 1 — Verification Agent (Gap & Missing Context Detection)**
+- [x] **2. Phase 1 — Verification Agent (Gap & Missing Context Detection)**
   Becomes usable: Clicking "Analyze Case" calls Gemini API to evaluate missing context/dates, rendering live reasoning feedback with subtle status badges (`[✓]`, `[!]`) and an interactive gap-resolution prompt with a "Proceed Anyway" button.
   Why now: Implements Phase 1 of the core loop and proves Gemini API connectivity early with real verification feedback.
   PRD ref: `prd.md > Features and Behavior > 1. Ingestion & Gap Detection Agent (Phase 1)`
@@ -29,7 +29,7 @@ Build mode: fast
   Learner check: Click "Analyze Case" on sample data, observe live reasoning status badges, and see the flagged missing context prompt appear.
   Commit: `Add Phase 1 verification agent for missing context detection`
 
-- [ ] **3. Phase 2 — Dual-Panel Forensic Dashboard & Interactive Timeline with Actor Filtering**
+- [x] **3. Phase 2 — Dual-Panel Forensic Dashboard & Interactive Timeline with Actor Filtering**
   Becomes usable: Completing verification or clicking "Proceed Anyway" renders the dual-panel Forensic Dashboard (Left Panel: Chronological Timeline with expandable events & Actor Filter pills; Right Panel: Bottleneck Diagnosis cards & Action Recommendations).
   Why now: Delivers the core kernel of Chronos—the zero-hallucination interactive timeline and bottleneck analysis.
   PRD ref: `prd.md > Features and Behavior > 2. Forensic Dashboard & Interactive Timeline`, `prd.md > 3. Bottleneck Analysis & Recommended Actions`
@@ -39,7 +39,7 @@ Build mode: fast
   Learner check: Explore the dual-panel dashboard, expand event cards, and click an Actor pill (e.g. "Tizio") to filter timeline events.
   Commit: `Implement dual-panel forensic dashboard with interactive timeline and actor filters`
 
-- [ ] **4. Executive Utility Actions & Printable PDF Report Export**
+- [x] **4. Executive Utility Actions & Printable PDF Report Export**
   Becomes usable: Clicking "Copy Summary" copies formatted bulleted text to clipboard; clicking "Export PDF Report" opens the export options modal (`[x] Timeline`, `[x] Bottlenecks`, `[x] Actions`) and triggers clean A4 PDF print preview via `@media print` CSS.
   Why now: Completes all remaining PRD features and acceptance criteria.
   PRD ref: `prd.md > Features and Behavior > 4. Custom PDF Report Generator`
@@ -51,7 +51,7 @@ Build mode: fast
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — Slice 2 (Phase 1 Verification Agent)
+- [x] Early usable behavior explored — Slice 2 (Phase 1 Verification Agent)
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review

@@ -1,3 +1,4 @@
+import './style.css';
 import { SAMPLE_DISPUTE_TEXT } from './data/sampleDispute.js';
 import { analyzeGaps, extractTimelineAndBottlenecks } from './services/geminiService.js';
 

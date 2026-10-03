@@ -16,10 +16,10 @@
       </div>
       <div class="header-actions">
         <button id="btn-tutorial" class="btn-icon">
-          <span>🎬</span> Tutorial Video
+          <span data-icon="play"></span> Tutorial Video
         </button>
         <button id="btn-theme-toggle" class="btn-icon">
-          <span id="theme-icon">☀️</span> <span id="theme-label">Light Mode</span>
+          <span id="theme-icon" data-icon="sun"></span> <span id="theme-label">Light Mode</span>
         </button>
       </div>
     </header>
@@ -31,12 +31,12 @@
 
     <!-- Ingestion Surface (Phase 1 Input) -->
     <section id="surface-ingestion" class="surface">
-      <h2 class="surface-title"><span>📥</span> Case Ingestion & Verification</h2>
+      <h2 class="surface-title">Case Ingestion & Verification</h2>
 
       <!-- File Upload Zone -->
       <div id="drop-zone" class="drop-zone">
         <div class="drop-zone-inner">
-          <div class="drop-icon">📁</div>
+          <div class="drop-icon" data-icon="upload"></div>
           <div>Drag & drop files here, or <label for="file-upload" class="file-label">browse files</label></div>
           <div class="drop-hint">Supported: .txt · .eml · .msg · .pdf</div>
           <input type="file" id="file-upload" accept=".txt,.eml,.msg,.pdf" multiple style="display:none" />
@@ -53,48 +53,52 @@
       <textarea id="input-dispute" class="chat-input" placeholder="Paste raw emails, Teams chat transcripts, WhatsApp exports, or any text logs here..."></textarea>
 
       <div class="ingestion-toolbar">
-        <button id="btn-load-sample" class="btn-secondary">📋 Load Sample Dispute Case</button>
-        <button id="btn-analyze-case" class="btn-primary">🔍 Analyze Case & Verify Gaps</button>
+        <button id="btn-load-sample" class="btn-secondary"><span data-icon="clipboard"></span> Load Sample Dispute Case</button>
+        <button id="btn-analyze-case" class="btn-primary"><span data-icon="search"></span> Analyze Case & Verify Gaps</button>
       </div>
     </section>
 
     <!-- Verification Log & Gap Detector Surface -->
     <section id="surface-verification" class="surface hidden">
-      <h2 class="surface-title"><span>🛡️</span> Phase 1: Context Verification Log</h2>
+      <h2 class="surface-title">Phase 1: Context Verification Log</h2>
       <div id="reasoning-log" class="reasoning-box"></div>
 
       <!-- Gap Action Box -->
       <div id="gap-action-box" class="hidden gap-action-box">
-        <h4 class="gap-title">⚠️ Missing Context Detected</h4>
+        <h4 class="gap-title"><span data-icon="alert"></span> Missing Context Detected</h4>
         <ul id="missing-gaps-list" class="gaps-list"></ul>
-        <button id="btn-proceed-anyway" class="btn-primary">Proceed to Forensic Dashboard →</button>
+        <button id="btn-proceed-anyway" class="btn-primary">Proceed to Forensic Dashboard <span data-icon="arrow"></span></button>
       </div>
     </section>
 
     <!-- Results Surface (Phase 2 Forensic Dashboard) -->
     <section id="surface-dashboard" class="surface hidden">
       <div class="dashboard-header">
-        <h2 class="surface-title" style="margin-bottom: 0;"><span>📊</span> Phase 2: Forensic Analysis Dashboard</h2>
+        <h2 class="surface-title" style="margin-bottom: 0;">Phase 2: Forensic Analysis Dashboard</h2>
         <div class="dashboard-actions">
-          <button id="btn-copy-summary" class="btn-secondary">📋 Copy Summary</button>
-          <button id="btn-export-pdf" class="btn-primary">📄 Export PDF Report</button>
+          <button id="btn-copy-summary" class="btn-secondary"><span data-icon="copy"></span> Copy Summary</button>
+          <button id="btn-export-pdf" class="btn-primary"><span data-icon="download"></span> Export PDF Report</button>
         </div>
       </div>
 
       <div class="results-grid">
         <!-- Panel 1: Interactive Timeline -->
-        <div class="panel">
+        <div class="panel" id="report-timeline">
           <h3 class="panel-title">Chronological Timeline</h3>
           <div id="actor-filters" class="actor-filters"></div>
           <div id="timeline-container"></div>
         </div>
 
         <!-- Panel 2: Bottlenecks & Action Plan -->
-        <div class="panel">
+        <div class="panel" id="report-findings">
+          <section id="report-bottlenecks">
           <h3 class="panel-title">Bottleneck Root Cause Analysis</h3>
           <div id="bottlenecks-container" style="margin-bottom: 1.5rem;"></div>
+          </section>
+          <section id="report-actions">
           <h3 class="panel-title">Actionable Resolution Steps</h3>
           <div id="recommendations-container"></div>
+          </section>
         </div>
       </div>
     </section>
@@ -112,7 +116,7 @@
       </div>
       <div class="modal-footer">
         <button id="btn-close-modal" class="btn-secondary">Cancel</button>
-        <button id="btn-trigger-print" class="btn-primary">Print / Save as PDF</button>
+        <button id="btn-trigger-print" class="btn-primary"><span data-icon="print"></span> Print / Save as PDF</button>
       </div>
     </div>
   </div>

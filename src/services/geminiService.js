@@ -118,34 +118,42 @@ export async function extractTimelineAndBottlenecks(text) {
 
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
   
-  const prompt = `You are a forensic timeline analyzer. Extract a strict chronological timeline, root cause bottlenecks, and actionable recommendations from the provided dispute communications.
+  const prompt = `You are a forensic timeline analyzer specializing in dispute resolution and root-cause analysis.
+Your task is to analyze the provided communication logs (which may include lengthy email threads or WhatsApp/Teams chats) and extract a clear, high-signal chronological timeline, root-cause bottlenecks, and actionable recommendations.
+
+CRITICAL INSTRUCTIONS FOR LARGE LOGS:
+- Do NOT include trivial chat chatter, greetings, or minor messages (e.g., 'ok', 'va bene', 'ci sentiamo dopo').
+- Synthesize and extract between 10 and 25 key operational milestones, decisions, disputes, delays, requests, or commitments.
+- For each event, identify the date/timestamp, key actor, a concise summary of the action, and the verbatim excerpt supporting it.
+- Identify the top root-cause bottlenecks (1 to 5) and prioritized recommendations.
+
 Respond ONLY with a valid JSON object matching this exact schema:
 {
   "timeline": [
     {
-      "id": "string",
-      "date": "string",
-      "actor": "string",
-      "summary": "string",
-      "raw_excerpt": "string"
+      "id": "evt-1",
+      "date": "YYYY-MM-DD HH:MM or original timestamp",
+      "actor": "Name or Role",
+      "summary": "Concise factual summary of the milestone",
+      "raw_excerpt": "Direct quote from the text"
     }
   ],
   "bottlenecks": [
     {
-      "id": "string",
-      "title": "string",
+      "id": "btn-1",
+      "title": "Title of bottleneck",
       "severity": "HIGH",
-      "description": "string"
+      "description": "Root cause explanation"
     }
   ],
   "recommendations": [
-    "string"
+    "Prioritized actionable recommendation"
   ]
 }
 
 Note: For severity, choose between HIGH, MEDIUM, or LOW.
 
-Dispute Text:
+Communication Logs:
 ${text}`;
 
   const response = await fetch(endpoint, {
@@ -153,7 +161,10 @@ ${text}`;
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: 'application/json' }
+      generationConfig: {
+        responseMimeType: 'application/json',
+        maxOutputTokens: 8192
+      }
     })
   });
 

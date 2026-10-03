@@ -1,98 +1,107 @@
-# Chronos — Timeline & Bottleneck Analyzer ⏳🔍
+# Chronos — Timeline & Bottleneck Analyzer
 
-> **Forensic Communication Intelligence Dashboard**  
-> *Ingest multi-channel dispute communications (emails, WhatsApp, Teams, PDFs) to audit timeline continuity, detect missing context, and diagnose root-cause bottlenecks with zero-hallucination structured outputs.*
+Chronos is a proof of concept for turning scattered operational communications into a readable case view. It combines emails, chat exports, and pasted notes, then helps a user identify missing context, reconstruct a timeline, surface possible bottlenecks, and prepare next steps.
 
----
+Built for the **Build with AI: Basics** hackathon, Chronos focuses on one complete workflow rather than attempting to be a production case-management system.
 
-## ⚠️ Security & Data Privacy Notice (PoC Disclaimer)
+## The problem
 
-> **Important:** This project is a functional Proof of Concept (PoC) built for the **Build with AI: Basics** hackathon.  
-> In this client-side prototype, text is sent directly from your browser to Google AI Studio's Gemini API (`gemini-2.5-flash`).  
-> **Do not upload confidential corporate agreements, privileged legal documents, or unmasked Personally Identifiable Information (PII)** when using public free-tier API keys.
+When a project, procurement process, or dispute stalls, the relevant facts are often split across email threads, chat messages, and informal notes. It takes time to establish what happened, which document or approval is missing, and what should happen next.
 
-### 🛡️ Enterprise Security & LLM-Agnostic Roadmap
-To transition Chronos into an enterprise-ready, GDPR-compliant production deployment:
-1. **Local Pre-Flight PII Redaction:** Implement client-side or backend tokenization (e.g., via Microsoft Presidio or local regex/NER) to replace sensitive entities (`Mario Rossi` → `[ACTOR_1]`, `IBAN IT02...` → `[BANK_DATA_1]`, `€45,000` → `[AMOUNT_1]`) *before* any text leaves the corporate firewall.
-2. **Sovereign Cloud & Zero Data Retention (ZDR):** Connect to Google Cloud Vertex AI (EU Regions: Frankfurt/Milan) with contractual Zero Data Retention guarantees and Customer-Managed Encryption Keys (CMEK).
-3. **100% Air-Gapped / LLM-Agnostic Engine:** Chronos is architecturally LLM-agnostic: by pointing the API client to an OpenAI-compatible endpoint, the engine can run entirely offline on local open-weight models (e.g., Gemma 2, Llama 3 via Ollama/vLLM) without sending any data over the internet.
+Chronos is designed for commercial, operations, and legal professionals who need a fast first reading of that material.
 
----
+## What the prototype does
 
-## 📌 Why Chronos?
+1. **Collects case material** from pasted text and locally selected files.
+2. **Checks for missing context** such as references to a message, meeting, or document that may not be in the material supplied.
+3. **Builds a timeline** of the significant events, with the source excerpt for each event.
+4. **Highlights possible bottlenecks** and proposes a prioritized action list.
+5. **Filters the timeline by person**, copies an executive summary, and produces a browser print view that can be saved as a PDF. The user can include only the timeline, bottlenecks, or actions in that export.
 
-In business operations, procurement, and legal disputes, the ground truth is rarely in one clean document. Critical information is scattered across email threads, Teams messages, WhatsApp chats, and PDF letters.
+The included sample case follows a supplier delivery block caused by an unpaid invoice and a missing Legal approval. It is the quickest way to see the full flow.
 
-Standard AI assistants or single-channel summaries (like Teams Copilot or Slack AI):
-- Only look at a single platform.
-- Hallucinate dates or smooth over conflicting statements.
-- Never audit whether a cited document is missing.
+## Current scope and limits
 
-**Chronos solves this through a dual-phase forensic pipeline:**
-1. **Phase 1 — Verification & Gap Detection:** Audits the submitted records for continuity breaks (e.g., *"Email #2 references a contract agreed on Sept 10th, but no record for Sept 10th was provided"*).
-2. **Phase 2 — Dual-Panel Forensic Dashboard:** Extracts a strict chronological timeline with actor filtering, isolates operational bottlenecks categorized by severity (`[HIGH]`, `[MEDIUM]`, `[LOW]`), and delivers actionable next steps.
+Chronos is an early, client-side prototype. It is useful for exploring a case and preparing a first operational discussion; it is not a source of legal advice or an authoritative record of events.
 
----
+- The reliable input paths today are pasted text, `.txt`, and simple text-based `.eml` files. The interface also accepts `.msg` and `.pdf`, but the prototype reads them as text and does not yet include dedicated Outlook MSG or PDF extraction.
+- With a configured Gemini key, the app sends the combined text to Gemini for the context check and the analysis.
+- Without a key, it displays a deterministic demonstration result so that the interaction can still be shown. That fallback is for the sample/demo experience and must not be treated as an analysis of arbitrary uploaded material.
+- The model is asked for JSON and direct source excerpts, but model outputs still need human review. Chronos does not independently verify every conclusion against the documents.
+- Files are processed in the browser and are not saved by Chronos. This prototype has no user accounts, database, collaboration features, or live Outlook/Teams integrations.
 
-## ✨ Features
-
-- **Multi-Source Ingestion:** Drag-and-drop support for `.txt`, `.eml`, `.msg`, and `.pdf` files, plus a direct paste zone for instant chat transcript analysis.
-- **Built-in Sample Case:** One-click loading of a realistic procurement dispute with multi-channel records in `public/sample_case/`.
-- **Noise Filtering Engine:** Optimized prompt pipeline that strips conversational noise from massive chat logs (tested on 15,000+ line exports) while extracting 10–25 high-signal milestones.
-- **Actor Filter Pills:** Isolate specific actors in the timeline with a single click.
-- **Forensic Monochromatic UI:** Deep slate aesthetic, JetBrains Mono typography, status badges (`[✓]`, `[!]`), and an instant **Dark / Light theme switch**.
-- **One-Click Export & Reporting:** 
-  - *Copy Summary:* Formats executive findings directly for Teams or Email.
-  - *Export PDF:* Uses print-ready CSS (`@media print`) to generate clean, printable A4 dispute audit reports.
-
----
-
-## 🚀 Quickstart Guide
+## Run locally
 
 ### Prerequisites
-- Node.js (v18+)
-- A Google Gemini API Key (from [Google AI Studio](https://aistudio.google.com/))
 
-### 1. Clone & Install
+- Node.js 18 or later
+- A Gemini API key if you want live AI analysis
+
+### Setup
+
 ```bash
-git clone https://github.com/bytesAIren/chronos-timeline-analyzer.git
-cd chronos-timeline-analyzer
 npm install
 ```
 
-### 2. Configure Environment
-Create a `.env` file in the root directory (you can copy `.env.example`):
-```bash
-# In your .env file:
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-```
-*(Note: If no API key is provided, Chronos automatically runs in an intelligent fallback simulation mode for safe demonstration).*
+Create a `.env` file in the project root:
 
-### 3. Start Development Server
+```bash
+VITE_GEMINI_API_KEY=your_gemini_api_key
+# Optional: defaults to gemini-2.5-flash
+VITE_GEMINI_MODEL=gemini-2.5-flash
+```
+
+Start the app:
+
 ```bash
 npm run dev
 ```
-Open **`http://localhost:5173`** in your browser.
 
----
+Open the local URL shown by Vite, usually `http://localhost:5173`.
 
-## 🧪 Testing the Application
+To create a production build:
 
-1. **Test with the Built-in Sample:** Click **"📋 Load Sample Dispute Case"** to load pre-staged procurement dispute records. Click **"🔍 Analyze Case"** to view Phase 1 Gap Detection and proceed to the dashboard.
-2. **Test with Real Logs:** Paste any conversational log (WhatsApp, Teams export, or customer support thread) or drag in `.txt`/`.eml` files.
-3. **Actor Filtering:** Click on any actor name pill above the timeline to filter events for that specific person.
-4. **Printable Audit Report:** Click **"📄 Export PDF Report"** to preview and print the executive summary.
+```bash
+npm run build
+```
 
----
+## Try the sample case
 
-## 🛠️ Architecture & Tech Stack
+1. Select **Load Sample Dispute Case**.
+2. Select **Analyze Case & Verify Gaps**.
+3. Review the context check and select **Proceed to Forensic Dashboard** when prompted.
+4. Explore the timeline, source excerpts, bottlenecks, and recommended actions.
+5. Use **Export PDF Report** to select the report sections and open the print dialog.
 
-- **Frontend:** Vanilla JavaScript (ES Modules) + Vite (Zero heavy UI framework bloat, sub-second load times)
-- **Styling:** Custom Forensic Design System with CSS Custom Properties and `@media print` rules
-- **LLM Engine:** Google Gemini 2.5 Flash (`gemini-2.5-flash`) via direct REST API with JSON Structured Output (`responseMimeType: "application/json"`)
-- **Process & Rigor:** Built following a plan-first methodology (Scope → PRD → Technical Spec → Step-by-Step Verified Slices).
+## Privacy and GDPR considerations
 
----
+The hackathon prototype deliberately keeps the architecture small, but this does **not** make it appropriate for confidential production use. When live analysis is enabled, the selected text is sent directly from the browser to the configured Gemini API endpoint. Do not upload privileged material, personal data, customer records, contracts, or internal communications unless you have confirmed that this is permitted by your organisation and your AI provider arrangement.
 
-## 📄 License
-MIT License. Created for the **Build with AI: Basics** Hackathon.
+Before a production rollout, Chronos would need a privacy and security design appropriate to the organisation and use case, including:
+
+- a lawful basis and documented data-flow assessment;
+- data minimisation, retention rules, and clear user notices;
+- local or server-side redaction/tokenisation of personal and sensitive information before model processing;
+- enterprise identity, access controls, audit logs, and encryption;
+- an approved processor agreement and a deployment region/data-retention model that meet the organisation's GDPR obligations;
+- human review and escalation rules for material operational or legal decisions.
+
+These are future product requirements, not features implemented by this repository.
+
+## Future directions
+
+The next useful improvements would be dedicated PDF and MSG parsers, a clear evidence-to-claim review step, re-analysis after a user adds missing material, and optional integrations with approved Outlook/Teams or document-management systems. A production edition could support a private model gateway or approved regional deployment, but Chronos is not currently model-provider agnostic or air-gapped.
+
+## Technical outline
+
+- Vanilla JavaScript, HTML, and CSS
+- Vite development and build tooling
+- Gemini REST API with JSON responses for the two analysis phases
+- Browser-native printing for PDF export
+- Local SVG icon set and responsive light/dark interface
+
+The planning documents required for the hackathon are in [`devpost/`](devpost/): [`scope.md`](devpost/scope.md), [`prd.md`](devpost/prd.md), and [`spec.md`](devpost/spec.md).
+
+## License
+
+MIT. Created for the Build with AI: Basics hackathon.

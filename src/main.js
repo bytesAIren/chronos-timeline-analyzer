@@ -137,11 +137,12 @@ dropZone.addEventListener('drop', async (e) => {
 // =============================================
 btnLoadSample.addEventListener('click', async () => {
   try {
-    // Fetch sample files from the sample_case directory served by Vite
+    // Fetch sample files relative to the application base URL
+    const base = import.meta.env.BASE_URL || './';
     const [emailResp, teamsResp, emlResp] = await Promise.all([
-      fetch('/sample_case/email_thread.txt'),
-      fetch('/sample_case/teams_chat.txt'),
-      fetch('/sample_case/legal_request.eml')
+      fetch(`${base}sample_case/email_thread.txt`),
+      fetch(`${base}sample_case/teams_chat.txt`),
+      fetch(`${base}sample_case/legal_request.eml`)
     ]);
     const [emails, teams, eml] = await Promise.all([
       emailResp.text(),

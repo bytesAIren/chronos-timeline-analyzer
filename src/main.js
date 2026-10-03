@@ -199,6 +199,11 @@ btnAnalyzeCase.addEventListener('click', async () => {
   surfaceVerification.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   try {
+    const isMock = !import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY === 'your_gemini_api_key_here';
+    if (isMock) {
+      appendLog('warn', 'Demo Mode: Running in offline simulation. Results reflect the reference Sample Dispute Case.');
+    }
+
     // Simulate step-by-step reasoning log
     await delay(400);
     appendLog('ok', `${appState.uploadedFiles.length} file(s) + pasted text parsed successfully.`);

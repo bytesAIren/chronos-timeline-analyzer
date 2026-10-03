@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chronos — App Map & Architectural Overview</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-dim: rgba(56, 189, 248, 0.1);
+      --font-mono: 'JetBrains Mono', monospace, Courier;
+      --font-sans: system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--text);
+    }
+    .badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    h2 {
+      font-size: 1.2rem;
+      margin-top: 0;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    ul, ol {
+      padding-left: 1.25rem;
+      color: var(--text-muted);
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+    li strong {
+      color: var(--text);
+    }
+    code {
+      font-family: var(--font-mono);
+      background: rgba(0,0,0,0.3);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: var(--accent);
+    }
+    .diagram-box {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+    .tip {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <h1>Chronos — App Map</h1>
+        <span class="badge">Reference Guide</span>
+      </div>
+      <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">
+        Architectural walkthrough and maintenance guide for the Timeline & Bottleneck Analyzer.
+      </p>
+    </header>
+
+    <!-- Overview -->
+    <div class="card">
+      <h2>📌 What Chronos Does & How It Works</h2>
+      <p style="color: var(--text-muted);">
+        Chronos is a dual-phase forensic intelligence tool designed to parse messy multi-channel communications (emails, WhatsApp, Teams, PDFs) into a coherent, verifiable audit trail:
+      </p>
+      <ul>
+        <li><strong>Phase 1 (Verification & Gap Detection):</strong> Audits files for temporal breaks or missing external references before running full forensic extraction.</li>
+        <li><strong>Phase 2 (Dual-Panel Forensic Dashboard):</strong> Extracts a chronological timeline with actor filtering pills, classifies root-cause bottlenecks by severity, and offers actionable next steps.</li>
+      </ul>
+    </div>
+
+    <!-- Core Pipeline Diagram -->
+    <div class="card">
+      <h2>🔄 The Execution Flow</h2>
+      <div class="diagram-box">
+        <svg viewBox="0 0 760 140" width="100%" height="140" xmlns="http://www.w3.org/2000/svg">
+          <!-- Ingestion -->
+          <rect x="10" y="40" width="160" height="60" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="90" y="66" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle" font-family="sans-serif">Multi-Source Ingestion</text>
+          <text x="90" y="84" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="sans-serif">Files + Paste Area</text>
+          
+          <!-- Arrow 1 -->
+          <path d="M 170 70 L 220 70" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+          
+          <!-- Phase 1 -->
+          <rect x="230" y="40" width="160" height="60" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="310" y="66" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle" font-family="sans-serif">Phase 1: Verification</text>
+          <text x="310" y="84" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="sans-serif">Gemini Gap Detection</text>
+          
+          <!-- Arrow 2 -->
+          <path d="M 390 70 L 440 70" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+          
+          <!-- Phase 2 -->
+          <rect x="450" y="40" width="180" height="60" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="540" y="66" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle" font-family="sans-serif">Phase 2: Forensic Output</text>
+          <text x="540" y="84" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="sans-serif">Structured JSON Schema</text>
+          
+          <!-- Arrow marker -->
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Code Tour / Key Locations -->
+    <div class="card">
+      <h2>🗺️ Reference Code Tour (3 Core Anchors)</h2>
+      <ol>
+        <li>
+          <strong>The Ingestion & UI State Controller:</strong> <code>src/main.js</code>
+          <br>Handles file drag-and-drop, sample dataset fetching, user input combination, reasoning log animation, and dual-panel rendering.
+        </li>
+        <li>
+          <strong>The AI Engine & JSON Schemas:</strong> <code>src/services/geminiService.js</code>
+          <br>Controls the prompt design, response schemas, token limits (8192 max tokens), and error handling for <code>gemini-2.5-flash</code>. Also provides intelligent offline fallback when no API key is provided.
+        </li>
+        <li>
+          <strong>The Forensic Theme & Print Engine:</strong> <code>src/style.css</code>
+          <br>Manages dynamic CSS variables (<code>:root[data-theme="light"]</code>), dark-mode forensic styling, actor filter pills, and custom <code>@media print</code> rules for executive PDF export.
+        </li>
+      </ol>
+    </div>
+
+    <!-- To Change This, Start Here -->
+    <div class="card">
+      <h2>🛠️ To Change This, Start Here</h2>
+      <ul>
+        <li><strong>To add a new LLM provider (OpenAI, Claude, Ollama):</strong> Open <code>src/services/geminiService.js</code> and replace or abstract the <code>fetch()</code> endpoint to point to an OpenAI-compatible endpoint. The JSON schema remains identical.</li>
+        <li><strong>To customize the dispute sample case:</strong> Edit the raw files in <code>public/sample_case/</code> (<code>email_thread.txt</code>, <code>teams_chat.txt</code>, <code>legal_request.eml</code>).</li>
+        <li><strong>To change the timeline display format:</strong> Modify <code>renderTimeline()</code> in <code>src/main.js</code>.</li>
+        <li><strong>To tweak the printable PDF report:</strong> Edit the <code>@media print</code> block in <code>src/style.css</code>.</li>
+      </ul>
+    </div>
+
+    <!-- A Practice to Reuse -->
+    <div class="card">
+      <h2>💡 A Practice to Reuse: Noise Filtering for Large Documents</h2>
+      <div class="tip">
+        <strong>The Problem Encountered:</strong> When ingesting a 15,000-line conversational log (e.g. WhatsApp export), an unconstrained LLM prompt attempts to extract every single trivial exchange ("ok", "ciao"), leading to request timeouts or truncated JSON.
+        <br><br>
+        <strong>The Solution Pattern:</strong> Explicitly instruct the model to synthesize between 10–25 critical turning points, discard informal chit-chat, and enforce a strict JSON schema with high output token allocation. This turns an unreadable flood of data into high-signal intelligence in seconds.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

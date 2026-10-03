@@ -1,5 +1,7 @@
 # Chronos — Timeline & Bottleneck Analyzer
 
+![Chronos Cover](assets/Chronos.jpg)
+
 Chronos is a proof of concept for turning scattered operational communications into a readable case view. It combines emails, chat exports, and pasted notes, then helps a user identify missing context, reconstruct a timeline, surface possible bottlenecks, and prepare next steps.
 
 Built for the **Build with AI: Basics** hackathon, Chronos focuses on one complete workflow rather than attempting to be a production case-management system.

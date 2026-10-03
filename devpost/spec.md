@@ -145,3 +145,8 @@ my_project/
 - **Learner Choice**: Web-native Vite + JS + Gemini API stack selected over Streamlit to achieve a crisp, custom monochromatic forensic dashboard layout.
 - **Learner Choice**: Structured JSON Output Schema selected for 0-hallucination, deterministic timeline parsing.
 - **Uncertainty Clarified**: Explained Gemini's `responseSchema` mechanism for deterministic JSON parsing, ensuring complete confidence in the timeline generator.
+
+## Sharing and Repository
+
+- **Public GitHub Repository**: https://github.com/bytesAIren/chronos-timeline-analyzer
+- **Demo Video**: [To be recorded and added to Devpost]

@@ -4,6 +4,8 @@ import { icon, mountIcons } from './icons.js';
 mountIcons();
 import { analyzeGaps, extractTimelineAndBottlenecks } from './services/geminiService.js';
 
+const DEMO_MODE = __CHRONOS_DEMO__;
+
 // =============================================
 //  APPLICATION STATE
 // =============================================
@@ -28,6 +30,8 @@ const btnTutorial     = document.getElementById('btn-tutorial');
 const dropZone        = document.getElementById('drop-zone');
 const fileUploadInput = document.getElementById('file-upload');
 const fileListEl      = document.getElementById('file-list');
+const inputDivider    = document.getElementById('input-divider');
+const demoBanner      = document.getElementById('demo-banner');
 
 const inputDispute    = document.getElementById('input-dispute');
 const btnLoadSample   = document.getElementById('btn-load-sample');
@@ -50,6 +54,14 @@ const btnExportPdf    = document.getElementById('btn-export-pdf');
 const modalExport     = document.getElementById('modal-export');
 const btnCloseModal   = document.getElementById('btn-close-modal');
 const btnTriggerPrint = document.getElementById('btn-trigger-print');
+
+if (DEMO_MODE) {
+  demoBanner.classList.remove('hidden');
+  dropZone.classList.add('hidden');
+  inputDivider.classList.add('hidden');
+  inputDispute.classList.add('hidden');
+  fileUploadInput.disabled = true;
+}
 
 // =============================================
 //  THEME TOGGLE
@@ -181,6 +193,10 @@ function buildCombinedText() {
 //  PHASE 1: ANALYZE CASE
 // =============================================
 btnAnalyzeCase.addEventListener('click', async () => {
+  if (DEMO_MODE && appState.uploadedFiles.length === 0) {
+    alert('This live preview runs the built-in Sample Dispute Case only. Select "Load Sample Dispute Case" to begin.');
+    return;
+  }
   const combined = buildCombinedText();
   if (!combined) {
     alert('Please upload files or paste text before analyzing.');
@@ -199,8 +215,7 @@ btnAnalyzeCase.addEventListener('click', async () => {
   surfaceVerification.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   try {
-    const isMock = !import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY === 'your_gemini_api_key_here';
-    if (isMock) {
+    if (DEMO_MODE) {
       appendLog('warn', 'Demo Mode: Running in offline simulation. Results reflect the reference Sample Dispute Case.');
     }
 

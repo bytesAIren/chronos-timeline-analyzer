@@ -1,4 +1,5 @@
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ? import.meta.env.VITE_GEMINI_API_KEY.trim() : '';
+const DEMO_MODE = __CHRONOS_DEMO__;
 
 // Use gemini-2.5-flash which is active and supported
 const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
@@ -7,7 +8,7 @@ const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
  * Phase 1: Context & Gap Verification Analysis
  */
 export async function analyzeGaps(text) {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
+  if (DEMO_MODE || !GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
     console.warn('Gemini API key missing. Using intelligent fallback verification.');
     await new Promise(resolve => setTimeout(resolve, 800));
     return {
@@ -61,7 +62,7 @@ ${text}`;
  * Phase 2: Chronological Timeline & Bottleneck Extraction (Structured JSON)
  */
 export async function extractTimelineAndBottlenecks(text) {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
+  if (DEMO_MODE || !GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
     await new Promise(resolve => setTimeout(resolve, 1000));
     return {
       timeline: [

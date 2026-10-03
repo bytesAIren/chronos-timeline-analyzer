@@ -30,7 +30,7 @@
     </div>
 
     <!-- Live Web Demo Notice -->
-    <div class="demo-banner">
+    <div id="demo-banner" class="demo-banner hidden" role="status">
       <span data-icon="alert"></span>
       <div>
         <strong>Live Web Preview:</strong> This online preview is hosted on GitHub Pages for hackathon demonstration and runs in offline simulation mode calibrated for the built-in <strong>Sample Dispute Case</strong>. To analyze your own custom documents or chats with live Gemini AI, clone the repository locally and provide your API key in <code>.env</code>.
@@ -55,7 +55,7 @@
       <div id="file-list" class="file-list hidden"></div>
 
       <!-- Divider -->
-      <div class="or-divider"><span>or paste text directly</span></div>
+      <div id="input-divider" class="or-divider"><span>or paste text directly</span></div>
 
       <!-- Text paste area -->
       <textarea id="input-dispute" class="chat-input" placeholder="Paste raw emails, Teams chat transcripts, WhatsApp exports, or any text logs here..."></textarea>

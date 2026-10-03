@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build
-        run: npm run build
+      - name: Build the offline sample-only demo
+        run: npm run build:demo
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

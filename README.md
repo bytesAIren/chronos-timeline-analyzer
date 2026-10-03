@@ -67,6 +67,8 @@ To create a production build:
 npm run build
 ```
 
+`npm run build:demo` creates the separate, sample-only offline build used by GitHub Pages. It never uses the local Gemini key.
+
 ## Try the sample case
 
 1. Select **Load Sample Dispute Case**.
